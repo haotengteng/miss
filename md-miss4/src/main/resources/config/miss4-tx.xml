@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- spring atomikos 配置　开始-->
+    <!-- mysql数据源 -->
+    <bean id="dataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+          init-method="init" destroy-method="close">
+        <description>mysql xa datasource</description>
+        <property name="uniqueResourceName">
+            <value>mysql_ds</value>
+        </property>
+        <property name="xaDataSourceClassName" value="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource" />
+        <property name="xaProperties">
+            <props>
+                <prop key="user">userName</prop>
+                <prop key="password">password</prop>
+                <prop key="URL">jdbc\:mysql\://127.0.0.1\:3306/dataBaseName?autoReconnect\=true</prop>
+            </props>
+        </property>
+        <!-- 连接池里面连接的个数? -->
+        <property name="poolSize" value="3"/>
+    </bean>
+
+    <!-- 定义SqlSessionFactory-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <!--<property name="plugins">-->
+            <!--<list>-->
+                <!--<ref bean="offsetLimitIntercepter" />-->
+                <!--<ref bean="sqlLogInterceptor" />-->
+            <!--</list>-->
+        <!--</property>-->
+    </bean>
+    <!-- mybatis操作接口扫描 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.haoteng.miss4.md.dao" />
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+    </bean>
+    <!-- atomikos事务管理器 -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager"
+          init-method="init" destroy-method="close">
+        <description>UserTransactionManager</description>
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="300" />
+    </bean>
+    <!-- spring 事务管理器 -->
+    <bean id="springTransactionManager"
+          class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager" />
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction" />
+        </property>
+    </bean>
+    <!-- 开启注解事务机制 -->
+    <tx:annotation-driven transaction-manager="springTransactionManager" />
+
+    <!-- 开启声明式事务机制 (定义传播)-->
+    <tx:advice id="txAdvice" transaction-manager="springTransactionManager">
+        <tx:attributes>
+            <tx:method name="add*"    propagation="REQUIRED" />
+            <tx:method name="save*"   propagation="REQUIRED" />
+            <tx:method name="del*"    propagation="REQUIRED" />
+            <tx:method name="remove*" propagation="REQUIRED" />
+            <tx:method name="insert*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="delete*" propagation="REQUIRED" />
+            <tx:method name="modify*" propagation="REQUIRED" />
+            <tx:method name="*WithTx" propagation="REQUIRED" />
+        </tx:attributes>
+    </tx:advice>
+    <!-- 定义事务作用范围 （定义隔离）-->
+    <aop:config>
+        <aop:pointcut id="transaction" expression="execution (* com.haoteng.miss4.md.serviceImpl.*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="transaction" />
+    </aop:config>
+</beans>
