@@ -13,14 +13,13 @@ import com.squareup.okhttp.Response;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sun.net.www.http.HttpClient;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 
@@ -58,12 +57,17 @@ public class hello {
 
     @POST
     @RequestMapping(value = "openbank")
-    public Object depositBank(AccountDto accountDto) {
+    public Object depositBank(@RequestBody  AccountDto accountDto) {
         Account account = new Account();
         BeanUtils.copyProperties(accountDto, account);
         boolean result = accountSrvice.AddAccount(account);
         JSONObject json = new JSONObject();
         json.put("result",result);
         return JSON.toJSONString(json);
+    }
+    @PUT
+    @RequestMapping(value = "transfer")
+    public Object  transferAccount(@FormParam(value = "comeId") String comeId, @FormParam(value = "amount") String amount){
+           return accountSrvice.modifyAccount(comeId,amount);
     }
 }

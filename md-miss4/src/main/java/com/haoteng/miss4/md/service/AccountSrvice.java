@@ -7,4 +7,8 @@ import com.haoteng.miss4.md.module.Account;
  */
 public interface AccountSrvice {
     boolean AddAccount(Account account);
+
+    boolean modifyAccount(String comeId,String amount);
+
+    Account queryAccountById(String id);
 }

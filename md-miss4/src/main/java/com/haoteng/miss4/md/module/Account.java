@@ -10,20 +10,13 @@ public class Account extends Base {
     public String idcardNo;
     public String amount;
 
-    public String getAmount() {
-        return amount;
+
+    public String getAccountId() {
+        return accountId;
     }
 
-    public void setAmount(String amount) {
-        this.amount = amount;
-    }
-
-    public String getIdcardNo() {
-        return idcardNo;
-    }
-
-    public void setIdcardNo(String idcardNo) {
-        this.idcardNo = idcardNo;
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     public String getUsernName() {
@@ -34,11 +27,19 @@ public class Account extends Base {
         this.usernName = usernName;
     }
 
-    public String getAccountId() {
-        return accountId;
+    public String getIdcardNo() {
+        return idcardNo;
     }
 
-    public void setAccountId(String accountId) {
-        this.accountId = accountId;
+    public void setIdcardNo(String idcardNo) {
+        this.idcardNo = idcardNo;
+    }
+
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
     }
 }

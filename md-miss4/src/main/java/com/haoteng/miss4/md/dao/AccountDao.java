@@ -9,4 +9,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountDao {
     int addAccount(Account account);
+
+    int modifyAcount(Account account);
+
+    Account selectAccountById(String accountId);
 }
